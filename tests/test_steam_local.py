@@ -57,6 +57,24 @@ class TestSteamLocal(unittest.TestCase):
             self.assertTrue((dst / "empty.bin").exists())
             self.assertEqual((dst / "empty.bin").read_bytes(), b"")
 
+    def test_copy_tree_overwrites_readonly_dest(self):
+        with tempfile.TemporaryDirectory() as td:
+            src = pathlib.Path(td) / "src"
+            dst = pathlib.Path(td) / "dst"
+            src.mkdir()
+            dst.mkdir()
+            (src / "read_only.bin").write_bytes(b"new content")
+
+            target_file = dst / "read_only.bin"
+            target_file.write_bytes(b"old content")
+            os.chmod(target_file, stat.S_IREAD)
+
+            try:
+                copy_tree_with_progress(src, dst, label="readonly test")
+                self.assertEqual(target_file.read_bytes(), b"new content")
+            finally:
+                os.chmod(target_file, stat.S_IWRITE)
+
     def test_freeze_app_manifest(self):
         with tempfile.TemporaryDirectory() as td:
             acf_path = pathlib.Path(td) / "appmanifest_123.acf"

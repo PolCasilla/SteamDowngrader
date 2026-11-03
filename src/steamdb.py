@@ -46,7 +46,9 @@ def parse_steamdb_manifest_date(text: str) -> datetime:
 def _read_cache_raw(cache_file: pathlib.Path) -> dict:
     if cache_file.exists():
         try:
-            return json.loads(cache_file.read_text(encoding="utf-8"))
+            data = json.loads(cache_file.read_text(encoding="utf-8"))
+            if isinstance(data, dict):
+                return data
         except Exception:
             pass
     return {}

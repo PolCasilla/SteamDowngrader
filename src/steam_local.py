@@ -100,6 +100,11 @@ def copy_tree_with_progress(src_dir: pathlib.Path, dst_dir: pathlib.Path, label:
         rel = src.relative_to(src_dir)
         dst = dst_dir / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
+        if dst.exists():
+            try:
+                os.chmod(dst, stat.S_IWRITE)
+            except Exception:
+                pass
         size = src.stat().st_size
 
         if size == 0:

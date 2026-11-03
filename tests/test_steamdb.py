@@ -51,6 +51,12 @@ class TestSteamDB(unittest.TestCase):
             cache_file.write_text("not json", encoding="utf-8")
             self.assertEqual(load_cache(cache_file), {})
 
+            # Valid non-dict JSON (e.g. list, null) returns empty dict and handles save
+            cache_file.write_text("[]", encoding="utf-8")
+            self.assertEqual(load_cache(cache_file), {})
+            save_to_cache(cache_file, "999", [{"manifest": "m1", "date": "14 January 2025 14:00:28 UTC"}])
+            self.assertIn("999", load_cache(cache_file))
+
             # Save and load valid entries
             rows = [{"manifest": "111222333444555", "date": "14 January 2025 14:00:28 UTC"}]
             save_to_cache(cache_file, "582161", rows)
